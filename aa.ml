@@ -439,17 +439,28 @@ let test = shokika (make_eki_list global_ekimei_list) "池袋"
 
 
 
-(* 重複の削除 *)
+(* ----- 重複の削除 ----- *)
 
 let rec insert_hira lst n = match lst with
     [] -> [n]
   | first :: rest -> if n.kana < first.kana then n::lst else first::(insert_hira rest n)
 
-let rec seiretsu lst = match lst with
+(* かな順でソート *)
+let rec ins_sort_hira lst = match lst with
     [] -> []
-  | first :: rest -> insert_hira (seiretsu rest) first
+  | first :: rest -> insert_hira (ins_sort_hira rest) first
+
+let test = ins_sort_hira global_ekimei_list
+
+let rec tyouhuku sorted_lst = match sorted_lst with
+    [] -> []
+  | first :: [] -> [first]
+  | first :: second :: rest -> if first.kana = second.kana
+                               then first::(tyouhuku rest)
+                               else first::second::(tyouhuku rest)
+
+let seiretsu lst = tyouhuku (ins_sort_hira lst)
 
 let test = seiretsu global_ekimei_list
-
 
 
