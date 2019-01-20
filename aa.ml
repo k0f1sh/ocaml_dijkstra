@@ -437,3 +437,19 @@ let rec shokika lst kiten =  match lst with
                                      
 let test = shokika (make_eki_list global_ekimei_list) "池袋"
 
+
+
+(* 重複の削除 *)
+
+let rec insert_hira lst n = match lst with
+    [] -> [n]
+  | first :: rest -> if n.kana < first.kana then n::lst else first::(insert_hira rest n)
+
+let rec seiretsu lst = match lst with
+    [] -> []
+  | first :: rest -> insert_hira (seiretsu rest) first
+
+let test = seiretsu global_ekimei_list
+
+
+
