@@ -464,3 +464,14 @@ let seiretsu lst = tyouhuku (ins_sort_hira lst)
 let test = seiretsu global_ekimei_list
 
 
+let compose f g =
+  let h x = f (g x)
+  in h
+
+let time2 x = x * 2
+let add3 x = x + 3
+
+let test = (compose time2 add3) 4
+
+
+
