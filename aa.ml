@@ -501,12 +501,11 @@ let koushin1 p q =
   | Some kyori -> if q.saitan_kyori > kyori
                   then {namae=q.namae;saitan_kyori=kyori;temae_list=q.namae::p.temae_list}
                   else q
-
+                
 let test = koushin1
              {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]}
              {namae="代々木公園";saitan_kyori=10.0;temae_list=[]}
-  
+         
 let koushin p v = List.map (koushin1 p) v
-
+                
 let test = koushin {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]} [{namae="代々木公園";saitan_kyori=10.0;temae_list=[]}]
-
