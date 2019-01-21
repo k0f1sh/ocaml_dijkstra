@@ -475,3 +475,38 @@ let test = (compose time2 add3) 4
 
 
 
+let twice f =
+  let g x = f (f x)
+  in g
+
+let test1 = (twice twice)
+let test2 = (test1 add3) 10
+
+
+(* 繋がってるかどうか、繋がっていて最短距離が小さかったら更新 *)
+
+let rec ekikan_kyori p q lst = match lst with
+    [] -> None
+  | first :: rest -> if ((first.kiten = p.namae && first.shuten = q.namae)
+                         || (first.kiten = q.namae && first.shuten = p.namae))
+                     then Some first.kyori
+                     else ekikan_kyori p q rest
+                            
+
+let koushin1 p q =
+  let kyori_opt = ekikan_kyori p q global_ekikan_list
+  in
+  match kyori_opt with
+    None -> q
+  | Some kyori -> if q.saitan_kyori > kyori
+                  then {namae=q.namae;saitan_kyori=kyori;temae_list=q.namae::p.temae_list}
+                  else q
+
+let test = koushin1
+             {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]}
+             {namae="代々木公園";saitan_kyori=10.0;temae_list=[]}
+  
+let koushin p v = List.map (koushin1 p) v
+
+let test = koushin {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]} [{namae="代々木公園";saitan_kyori=10.0;temae_list=[]}]
+
