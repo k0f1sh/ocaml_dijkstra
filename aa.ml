@@ -460,9 +460,15 @@ let rec tyouhuku sorted_lst = match sorted_lst with
                                then first::(tyouhuku rest)
                                else first::second::(tyouhuku rest)
 
-let seiretsu lst = tyouhuku (ins_sort_hira lst)
+let seiretsu lst = tyouhuku (ins_sort_hira global_ekimei_list)
 
-let test = seiretsu global_ekimei_list
+let test = seiretsu [{kanji="北";kana="きた";romaji="kita";shozoku="a"};
+                     {kanji="南";kana="みなみ";romaji="kita";shozoku="a"};
+                     {kanji="北";kana="きた";romaji="kita";shozoku="a"};
+                     {kanji="東";kana="ひがし";romaji="kita";shozoku="a"};
+                    ]
+
+let test2 = seiretsu global_ekimei_list
 
 
 let compose f g =
@@ -636,4 +642,4 @@ let dijkstra kiten_romaji shuten_romaji =
 
 let test = dijkstra "shinjuku" "ikebukuro"
 
-
+(* TODO 重複がうまくうごいてない。total_distanceが使われていない*)
