@@ -616,18 +616,19 @@ let rec romaji_to_kanji romaji ekimei_list = match ekimei_list with
 
 let test = romaji_to_kanji "myogadani" global_ekimei_list
 
-let make_initial_eki_list ekimei_list kiten = List.map (fun ekimei ->
-                                                  if ekimei.kanji = kiten
-                                                  then
-                                                    {namae=ekimei.kanji;
-                                                        saitan_kyori=0.0;
-                                                        temae_list=[ekimei.kanji]}
-                                                  else
-                                                       {namae=ekimei.kanji;
-                                                        saitan_kyori=infinity;
-                                                        temae_list=[]})
-                                                       ekimei_list
-
+let make_initial_eki_list ekimei_list kiten =
+  List.map (fun ekimei ->
+      if ekimei.kanji = kiten
+      then
+        {namae=ekimei.kanji;
+         saitan_kyori=0.0;
+         temae_list=[ekimei.kanji]}
+      else
+        {namae=ekimei.kanji;
+         saitan_kyori=infinity;
+         temae_list=[]})
+           ekimei_list
+  
 let rec get_last_one lst = match lst with
     [] -> raise Not_found
   | last :: [] -> last
