@@ -458,15 +458,16 @@ let rec tyouhuku sorted_lst = match sorted_lst with
   | first :: [] -> [first]
   | first :: second :: rest -> if first.kana = second.kana
                                then first::(tyouhuku rest)
-                               else first::second::(tyouhuku rest)
+                               else first::(tyouhuku (second :: rest))
 
-let seiretsu lst = tyouhuku (ins_sort_hira global_ekimei_list)
+let seiretsu lst = tyouhuku (ins_sort_hira lst)
 
-let test = seiretsu [{kanji="北";kana="きた";romaji="kita";shozoku="a"};
-                     {kanji="南";kana="みなみ";romaji="kita";shozoku="a"};
-                     {kanji="北";kana="きた";romaji="kita";shozoku="a"};
-                     {kanji="東";kana="ひがし";romaji="kita";shozoku="a"};
-                    ]
+let testa = seiretsu [{kanji="北";kana="きた";romaji="kita";shozoku="a"};
+                      {kanji="南";kana="みなみ";romaji="kita";shozoku="a"};
+                      {kanji="北";kana="きた";romaji="kita";shozoku="a"};
+                      {kanji="東";kana="ひがし";romaji="kita";shozoku="a"}
+                     ]
+
 
 let test2 = seiretsu global_ekimei_list
 
@@ -640,6 +641,5 @@ let dijkstra kiten_romaji shuten_romaji =
   let ret = dijkstra_main initial_eki_list global_ekikan_list in
   get_last_one (List.filter (fun eki -> eki.namae = shuten_kanji) ret)
 
-let test = dijkstra "shinjuku" "ikebukuro"
+let test = dijkstra "ikebukuro" "ogikubo"
 
-(* TODO 重複がうまくうごいてない。total_distanceが使われていない*)
