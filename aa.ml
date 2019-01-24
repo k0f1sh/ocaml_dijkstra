@@ -494,23 +494,6 @@ let rec ekikan_kyori p q lst = match lst with
                      else ekikan_kyori p q rest
                             
 
-let koushin1 p q =
-  let kyori_opt = ekikan_kyori p q global_ekikan_list
-  in
-  match kyori_opt with
-    None -> q
-  | Some kyori -> if q.saitan_kyori > kyori
-                  then {namae=q.namae;saitan_kyori=kyori;temae_list=q.namae::p.temae_list}
-                  else q
-                
-let test = koushin1
-             {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]}
-             {namae="代々木公園";saitan_kyori=10.0;temae_list=[]}
-         
-let koushin p v = List.map (koushin1 p) v
-                
-let test = koushin {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]} [{namae="代々木公園";saitan_kyori=10.0;temae_list=[]}]
-
 
 let rec sum lst = match lst with
     [] -> 0
@@ -568,3 +551,89 @@ let saitan_wo_bunri lst =
 let test = saitan_wo_bunri [{namae="hoge1";saitan_kyori=1.0;temae_list=[]};
                             {namae="hoge2";saitan_kyori=0.4;temae_list=[]};
                             {namae="hoge3";saitan_kyori=9.4;temae_list=[]}]
+(* fold_right使った版 *)
+let saitan_wo_bunri_sub eki (item, lst) = 
+  if eki.saitan_kyori < item.saitan_kyori
+  then (eki, item :: lst)
+  else (item, eki :: lst)
+  
+let saitan_wo_bunri2 lst = match lst with
+    [] -> raise Not_found
+  | first :: rest -> List.fold_right saitan_wo_bunri_sub rest (first, []) 
+
+type distance_t = {
+    kyori: float;
+    total : float;
+}
+
+let total_distance lst =
+  let rec hojo lst total0 = match lst with
+      [] -> []
+    | {kyori = k; total = t} :: rest ->
+       {kyori = k; total = total0 +. k}
+      :: hojo rest (total0 +. k)
+  in hojo lst 0.0
+
+
+
+let koushin1 ekikan_list p q =
+  let kyori_opt = ekikan_kyori p q ekikan_list
+  in
+  match kyori_opt with
+    None -> q
+  | Some kyori -> if q.saitan_kyori > kyori
+                  then {namae=q.namae;saitan_kyori=kyori;temae_list=q.namae::p.temae_list}
+                  else q
+                
+let test = koushin1 global_ekikan_list
+             {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]}
+             {namae="代々木公園";saitan_kyori=10.0;temae_list=[]}
+         
+let koushin ekikan_list p v = List.map (koushin1 ekikan_list p) v
+                
+let test = koushin global_ekikan_list {namae="代々木上原";saitan_kyori=999.0;temae_list=["代々木上原"]} [{namae="代々木公園";saitan_kyori=10.0;temae_list=[]}]
+
+ (* dijkstra_main : eki_t list -> ekikan_t list -> eki_t list *)
+let rec dijkstra_main eki_list ekikan_list = match eki_list with
+    [] -> []
+  | lst -> 
+     let (eki, bunri_eki_list) = saitan_wo_bunri2 lst
+     in let koushin_go_list = koushin ekikan_list eki bunri_eki_list
+        in eki :: (dijkstra_main koushin_go_list ekikan_list)
+
+let rec romaji_to_kanji romaji ekimei_list = match ekimei_list with
+    [] -> ""
+  | first :: rest -> if first.romaji = romaji
+                     then first.kanji
+                     else romaji_to_kanji romaji rest
+
+let test = romaji_to_kanji "myogadani" global_ekimei_list
+
+let make_initial_eki_list ekimei_list kiten = List.map (fun ekimei ->
+                                                  if ekimei.kanji = kiten
+                                                  then
+                                                    {namae=ekimei.kanji;
+                                                        saitan_kyori=0.0;
+                                                        temae_list=[ekimei.kanji]}
+                                                  else
+                                                       {namae=ekimei.kanji;
+                                                        saitan_kyori=infinity;
+                                                        temae_list=[]})
+                                                       ekimei_list
+
+let rec get_last_one lst = match lst with
+    [] -> raise Not_found
+  | last :: [] -> last
+  | _ :: rest -> get_last_one rest
+                                            
+let dijkstra kiten_romaji shuten_romaji =
+  let seiretsu_list = seiretsu global_ekimei_list in
+  let kiten_kanji = romaji_to_kanji kiten_romaji seiretsu_list in
+  let shuten_kanji = romaji_to_kanji shuten_romaji global_ekimei_list in
+  let initial_eki_list = make_initial_eki_list global_ekimei_list kiten_kanji in
+  let ret = dijkstra_main initial_eki_list global_ekikan_list in
+  get_last_one (List.filter (fun eki -> eki.namae = shuten_kanji) ret)
+
+let test = dijkstra "shinjuku" "ikebukuro"
+
+
